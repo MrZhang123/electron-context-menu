@@ -114,7 +114,7 @@ const create = (win, options) => {
 			}),
 			pasteAsPlainText: decorateMenuItem({
 				id: 'pasteAsPlainText',
-				label: 'Paste &As &Plain &Text',
+				label: 'Paste As Plain Text',
 				enabled: editFlags.canPaste,
 				visible: props.isEditable,
 				click(menuItem) {
