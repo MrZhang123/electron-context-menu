@@ -1,7 +1,7 @@
 'use strict';
 const electron = require('electron');
 const cliTruncate = require('cli-truncate');
-const {download} = require('electron-dl');
+const { download } = require('electron-dl');
 const isDev = require('electron-is-dev');
 
 const webContents = win => win.webContents || (win.id && win);
@@ -34,13 +34,13 @@ const create = (win, options) => {
 			return;
 		}
 
-		const {editFlags} = props;
+		const { editFlags } = props;
 		const hasText = props.selectionText.length > 0;
 		const isLink = Boolean(props.linkURL);
 		const can = type => editFlags[`can${type}`] && hasText;
 
 		const defaultActions = {
-			separator: () => ({type: 'separator'}),
+			separator: () => ({ type: 'separator' }),
 			learnSpelling: decorateMenuItem({
 				id: 'learnSpelling',
 				label: '&Learn Spelling',
@@ -109,14 +109,19 @@ const create = (win, options) => {
 				visible: props.isEditable,
 				click(menuItem) {
 					const target = webContents(win);
-
-					if (menuItem.transform) {
-						let clipboardContent = electron.clipboard.readText(props.selectionText);
-						clipboardContent = menuItem.transform ? menuItem.transform(clipboardContent) : clipboardContent;
-						target.insertText(clipboardContent);
-					} else {
-						target.paste();
-					}
+					target.paste();
+				}
+			}),
+			pasteAsPlainText: decorateMenuItem({
+				id: 'pasteAsPlainText',
+				label: 'Paste &As &Plain &Text',
+				enabled: editFlags.canPaste,
+				visible: props.isEditable,
+				click(menuItem) {
+					const target = webContents(win);
+					let clipboardContent = electron.clipboard.readText(props.selectionText);
+					clipboardContent = menuItem.transform ? menuItem.transform(clipboardContent) : clipboardContent;
+					target.insertText(clipboardContent);
 				}
 			}),
 			selectAll: decorateMenuItem({
@@ -141,7 +146,7 @@ const create = (win, options) => {
 				visible: props.mediaType === 'image',
 				click(menuItem) {
 					props.srcURL = menuItem.transform ? menuItem.transform(props.srcURL) : props.srcURL;
-					download(win, props.srcURL, {saveAs: true});
+					download(win, props.srcURL, { saveAs: true });
 				}
 			}),
 			saveVideo: decorateMenuItem({
@@ -159,7 +164,7 @@ const create = (win, options) => {
 				visible: props.mediaType === 'video',
 				click(menuItem) {
 					props.srcURL = menuItem.transform ? menuItem.transform(props.srcURL) : props.srcURL;
-					download(win, props.srcURL, {saveAs: true});
+					download(win, props.srcURL, { saveAs: true });
 				}
 			}),
 			copyLink: decorateMenuItem({
@@ -181,7 +186,7 @@ const create = (win, options) => {
 				visible: props.linkURL.length > 0 && props.mediaType === 'none',
 				click(menuItem) {
 					props.linkURL = menuItem.transform ? menuItem.transform(props.linkURL) : props.linkURL;
-					download(win, props.linkURL, {saveAs: true});
+					download(win, props.linkURL, { saveAs: true });
 				}
 			}),
 			copyImage: decorateMenuItem({
@@ -279,6 +284,7 @@ const create = (win, options) => {
 			defaultActions.cut(),
 			defaultActions.copy(),
 			defaultActions.paste(),
+			defaultActions.pasteAsPlainText(),
 			shouldShowSelectAll && defaultActions.selectAll(),
 			defaultActions.separator(),
 			options.showSaveImage && defaultActions.saveImage(),
@@ -411,10 +417,10 @@ module.exports = (options = {}) => {
 			};
 
 			const listenerFunction = win.addEventListener || win.addListener;
-			listenerFunction('dom-ready', onDomReady, {once: true});
+			listenerFunction('dom-ready', onDomReady, { once: true });
 
 			disposables.push(() => {
-				win.removeEventListener('dom-ready', onDomReady, {once: true});
+				win.removeEventListener('dom-ready', onDomReady, { once: true });
 			});
 
 			return dispose;
